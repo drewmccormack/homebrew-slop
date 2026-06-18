@@ -10,6 +10,11 @@ class Slop < Formula
   depends_on arch: :arm64  # Apple Silicon only
   depends_on macos: :tahoe # macOS 26+: requires Apple FoundationModels
 
+  # FoundationModels uses Swift macros (@Generable/@Guide); the macro plugin
+  # server fails to load under Homebrew's scrubbed superenv. Use the standard
+  # environment so the full Xcode toolchain context is available to it.
+  env :std
+
   def install
     system "swift", "build", "-c", "release", "--disable-sandbox"
 
