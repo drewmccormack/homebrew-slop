@@ -16,7 +16,16 @@ class Slop < Formula
   env :std
 
   def install
-    system "swift", "build", "-c", "release", "--disable-sandbox"
+    # This machine may have a beta Xcode selected and a mismatched Command Line
+    # Tools SDK; pin the build to the released Xcode so the toolchain and SDK
+    # agree (otherwise the FoundationModels macro plugin + Darwin modules clash).
+    developer_dir = "/Applications/Xcode.app/Contents/Developer"
+    args = %w[swift build -c release --disable-sandbox]
+    if File.directory?(developer_dir)
+      system "env", "DEVELOPER_DIR=#{developer_dir}", *args
+    else
+      system(*args)
+    end
 
     # The compiled product is named `slop`; install it as `slop-bin` because the
     # user-facing `slop` is a shell alias (it needs call-site `noglob` in zsh,
